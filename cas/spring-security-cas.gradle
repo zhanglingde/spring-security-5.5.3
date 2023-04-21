@@ -1,0 +1,19 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api project(':spring-security-web')
+	api 'org.jasig.cas.client:cas-client-core'
+	api 'org.springframework:spring-beans'
+	api 'org.springframework:spring-context'
+	api 'org.springframework:spring-core'
+	api 'org.springframework:spring-web'
+
+	optional 'com.fasterxml.jackson.core:jackson-databind'
+	optional 'net.sf.ehcache:ehcache'
+
+	provided 'javax.servlet:javax.servlet-api'
+
+	testImplementation 'org.skyscreamer:jsonassert'
+}

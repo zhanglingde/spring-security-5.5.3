@@ -1,0 +1,32 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api 'org.springframework:spring-beans'
+	api 'org.springframework:spring-context'
+	api 'org.springframework:spring-core'
+	api 'org.springframework:spring-tx'
+
+	optional apachedsDependencies
+	optional 'ldapsdk:ldapsdk'
+	optional "com.unboundid:unboundid-ldapsdk"
+	optional 'org.apache.directory.shared:shared-ldap'
+
+	api ('org.springframework.ldap:spring-ldap-core') {
+		exclude(group: 'commons-logging', module: 'commons-logging')
+		exclude(group: 'org.springframework', module: 'spring-beans')
+		exclude(group: 'org.springframework', module: 'spring-core')
+		exclude(group: 'org.springframework', module: 'spring-tx')
+		exclude(group: 'org.springframework.data', module: 'spring-data-commons')
+	}
+
+	testImplementation project(':spring-security-test')
+	testImplementation 'org.slf4j:jcl-over-slf4j'
+	testImplementation 'org.slf4j:slf4j-api'
+}
+
+integrationTest {
+//	  exclude('**/OpenLDAPIntegrationTestSuite.class')
+	maxParallelForks = 1
+}

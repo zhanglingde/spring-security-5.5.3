@@ -1,0 +1,20 @@
+apply plugin: 'io.spring.convention.spring-test'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	implementation project(':spring-security-core')
+	implementation 'org.python:jython'
+	implementation 'org.springframework:spring-aop'
+	implementation 'org.springframework:spring-beans'
+	implementation 'org.springframework:spring-context'
+	implementation 'org.springframework:spring-tx'
+
+	testImplementation project(':spring-security-web')
+	testImplementation 'javax.servlet:javax.servlet-api'
+	testImplementation 'org.springframework:spring-web'
+
+	testRuntimeOnly project(':spring-security-config')
+	testRuntimeOnly 'org.aspectj:aspectjweaver'
+}
+
+System.setProperty('python.cachedir.skip', 'true')

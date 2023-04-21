@@ -1,0 +1,22 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api project(':spring-security-oauth2-core')
+	api project(':spring-security-web')
+	api springCoreDependency
+
+	optional project(':spring-security-oauth2-jose')
+	optional 'com.nimbusds:oauth2-oidc-sdk'
+	optional 'io.projectreactor:reactor-core'
+	optional 'org.springframework:spring-webflux'
+
+	provided 'javax.servlet:javax.servlet-api'
+
+	testImplementation project(path: ':spring-security-oauth2-jose', configuration: 'tests')
+	testImplementation 'com.squareup.okhttp3:mockwebserver'
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+	testImplementation 'io.projectreactor.netty:reactor-netty'
+	testImplementation 'io.projectreactor:reactor-test'
+}

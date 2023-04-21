@@ -1,0 +1,14 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api springCoreDependency
+	api 'org.springframework:spring-web'
+
+	optional 'com.fasterxml.jackson.core:jackson-databind'
+	optional 'com.nimbusds:oauth2-oidc-sdk'
+	optional 'org.springframework:spring-webflux'
+
+	testImplementation powerMock2Dependencies
+}

@@ -1,0 +1,23 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api 'org.springframework:spring-beans'
+	api 'org.springframework:spring-context'
+	api 'org.springframework:spring-core'
+	api 'org.springframework:spring-expression'
+	api 'org.springframework:spring-messaging'
+
+	optional project(':spring-security-web')
+	optional 'org.springframework:spring-websocket'
+	optional 'io.projectreactor:reactor-core'
+	optional 'javax.servlet:javax.servlet-api'
+
+	testImplementation project(path: ':spring-security-core', configuration: 'tests')
+	testImplementation 'commons-codec:commons-codec'
+	testImplementation powerMock2Dependencies
+	testImplementation slf4jDependencies
+
+	testRuntimeOnly 'org.hsqldb:hsqldb'
+}

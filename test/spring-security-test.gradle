@@ -1,0 +1,29 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api project(':spring-security-web')
+	api 'org.springframework:spring-core'
+	api 'org.springframework:spring-test'
+
+	optional project(':spring-security-config')
+	optional project(':spring-security-oauth2-client')
+	optional project(':spring-security-oauth2-jose')
+	optional project(':spring-security-oauth2-resource-server')
+	optional 'io.projectreactor:reactor-core'
+	optional 'org.springframework:spring-webmvc'
+	optional 'org.springframework:spring-webflux'
+
+	provided 'javax.servlet:javax.servlet-api'
+
+	testImplementation project(path : ':spring-security-config', configuration : 'tests')
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+	testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'javax.xml.bind:jaxb-api'
+	testImplementation 'org.skyscreamer:jsonassert'
+	testImplementation 'org.springframework:spring-webmvc'
+	testImplementation 'org.springframework:spring-tx'
+	testImplementation powerMock2Dependencies
+}

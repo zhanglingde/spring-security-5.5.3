@@ -1,0 +1,76 @@
+apply plugin: 'io.spring.convention.spring-module'
+apply plugin: 'nebula.facet'
+
+facets {
+	opensaml3Main {
+		parentSourceSet = 'main'
+	}
+	opensaml4Main {
+		parentSourceSet = 'main'
+	}
+	opensaml3Test {
+		parentSourceSet = 'opensaml3Main'
+	}
+	opensaml4Test {
+		parentSourceSet = 'opensaml4Main'
+	}
+}
+
+sourceSets {
+	opensaml3Test {
+		compileClasspath += sourceSets.test.output
+		runtimeClasspath += sourceSets.test.output
+	}
+	opensaml4Test {
+		compileClasspath += sourceSets.test.output
+		runtimeClasspath += sourceSets.test.output
+	}
+}
+
+configurations {
+	opensaml3TestImplementation.extendsFrom testImplementation
+	opensaml4TestImplementation.extendsFrom testImplementation
+}
+
+compileOpensaml4MainJava {
+	sourceCompatibility = '11'
+	targetCompatibility = '11'
+}
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-web')
+	api "org.opensaml:opensaml-core"
+	api "org.opensaml:opensaml-saml-api"
+	api "org.opensaml:opensaml-saml-impl"
+	opensaml4MainCompile "org.opensaml:opensaml-core:4.1.1"
+	opensaml4MainCompile "org.opensaml:opensaml-saml-api:4.1.1"
+	opensaml4MainCompile "org.opensaml:opensaml-saml-impl:4.1.1"
+
+	provided 'javax.servlet:javax.servlet-api'
+
+	testImplementation 'com.squareup.okhttp3:mockwebserver'
+}
+
+project.tasks.matching { t -> t.name == "jar"}.configureEach {
+	from {
+		compileOpensaml3MainJava
+	}
+	from {
+		compileOpensaml4MainJava
+	}
+}
+
+project.tasks.matching { t -> t.name == "sourcesJar"}.configureEach {
+	from {
+		sourceSets.opensaml3Main.allSource
+	}
+	from {
+		sourceSets.opensaml4Main.allSource
+	}
+}
+
+
+javadoc {
+	source += sourceSets.opensaml3Main.allJava + sourceSets.opensaml4Main.allJava
+}

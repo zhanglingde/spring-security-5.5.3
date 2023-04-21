@@ -1,0 +1,17 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	management platform(project(":spring-security-dependencies"))
+	api project(':spring-security-core')
+	api project(':spring-security-oauth2-core')
+	api springCoreDependency
+	api 'com.nimbusds:nimbus-jose-jwt'
+
+	optional 'io.projectreactor:reactor-core'
+	optional 'org.springframework:spring-webflux'
+
+	testImplementation powerMock2Dependencies
+	testImplementation 'com.squareup.okhttp3:mockwebserver'
+	testImplementation 'io.projectreactor.netty:reactor-netty'
+	testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+}
