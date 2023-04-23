@@ -62,6 +62,10 @@ public class SimpleUrlAuthenticationFailureHandler implements AuthenticationFail
 	public SimpleUrlAuthenticationFailureHandler() {
 	}
 
+	/**
+	 *
+	 * @param defaultFailureUrl 登录失败时要跳转的地址
+	 */
 	public SimpleUrlAuthenticationFailureHandler(String defaultFailureUrl) {
 		setDefaultFailureUrl(defaultFailureUrl);
 	}
@@ -83,15 +87,19 @@ public class SimpleUrlAuthenticationFailureHandler implements AuthenticationFail
 			else {
 				this.logger.debug("Sending 401 Unauthorized error");
 			}
+			// 跳转地址为 null,response 返回异常信息
 			response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
 			return;
 		}
+
 		saveException(request, exception);
 		if (this.forwardToDestination) {
 			this.logger.debug("Forwarding to " + this.defaultFailureUrl);
+			// forwardToDestination 为 true 通过服务端跳转
 			request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
 		}
 		else {
+			// 否则重定向到登录页面
 			this.redirectStrategy.sendRedirect(request, response, this.defaultFailureUrl);
 		}
 	}
@@ -106,6 +114,7 @@ public class SimpleUrlAuthenticationFailureHandler implements AuthenticationFail
 	 */
 	protected final void saveException(HttpServletRequest request, AuthenticationException exception) {
 		if (this.forwardToDestination) {
+			// forwardToDestination 为 true 通过服务端跳转到登录页面，把异常信息放到 request 中
 			request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, exception);
 			return;
 		}

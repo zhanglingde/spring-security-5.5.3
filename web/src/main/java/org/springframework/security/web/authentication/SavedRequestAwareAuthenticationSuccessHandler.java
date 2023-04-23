@@ -61,6 +61,8 @@ import org.springframework.util.StringUtils;
  * it will delegate to the base class.</li>
  * </ul>
  *
+ * 通过 defaultSuccessUrl 配置登录成功后重定向的地址，登录成功后的处理器
+ *
  * @author Luke Taylor
  * @since 3.0
  */
@@ -73,20 +75,26 @@ public class SavedRequestAwareAuthenticationSuccessHandler extends SimpleUrlAuth
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws ServletException, IOException {
+		// 1. 从 requestCache 中获取缓存下来的请求
 		SavedRequest savedRequest = this.requestCache.getRequest(request, response);
 		if (savedRequest == null) {
+			// 没有获取到缓存请求，说明用户在访问登录页面之前没有访问其他页面，调用父类 onAuthenticationSuccess 方法，最终重定向到 defaultSuccessUrl 指定的地址
 			super.onAuthenticationSuccess(request, response, authentication);
 			return;
 		}
+		// 2. 获取用户显示指定，希望登录成功后重定向的地址的 key 即 target，如 localhost:8080/doLogin?target=/hello
 		String targetUrlParameter = getTargetUrlParameter();
 		if (isAlwaysUseDefaultTargetUrl()
 				|| (targetUrlParameter != null && StringUtils.hasText(request.getParameter(targetUrlParameter)))) {
+			// 如果 target 存在，或用户设置了 alwaysUseDefaultTargetUrl 为 true,缓存请求无意义，移除缓存请求
 			this.requestCache.removeRequest(request, response);
+			// 调用父类完成重定向。target 存在重定向到 target 指定 url；alwaysUseDefaultTargetUrl 为 true 重定向到 defaultSuccessUrl;两个都满足重定向到 defaultSuccessUrl
 			super.onAuthenticationSuccess(request, response, authentication);
 			return;
 		}
 		clearAuthenticationAttributes(request);
 		// Use the DefaultSavedRequest URL
+		// 3. 前面条件都不满足，从缓存请求中获取重定向地址重定向
 		String targetUrl = savedRequest.getRedirectUrl();
 		getRedirectStrategy().sendRedirect(request, response, targetUrl);
 	}

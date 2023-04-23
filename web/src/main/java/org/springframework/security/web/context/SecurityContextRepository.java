@@ -59,6 +59,8 @@ public interface SecurityContextRepository {
 	SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder);
 
 	/**
+	 * 请求完成时存储 SecurityContext 到 HttpSession
+	 *
 	 * Stores the security context on completion of a request.
 	 * @param context the non-null context which was obtained from the holder.
 	 * @param request

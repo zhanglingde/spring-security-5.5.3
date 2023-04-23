@@ -177,8 +177,7 @@ public class SaveContextOnUpdateOrErrorResponseWrapperTests {
 		assertThat(this.wrappedResponse.securityContext).isNull();
 	}
 
-	private static class SaveContextOnUpdateOrErrorResponseWrapperStub
-			extends SaveContextOnUpdateOrErrorResponseWrapper {
+	private static class SaveContextOnUpdateOrErrorResponseWrapperStub extends SaveContextOnUpdateOrErrorResponseWrapper {
 
 		private SecurityContext securityContext;
 

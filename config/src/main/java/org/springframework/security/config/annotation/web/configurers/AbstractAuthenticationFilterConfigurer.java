@@ -199,6 +199,9 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 	}
 
 	/**
+	 * 登录失败，重定向客户端的跳转 url
+	 * 该方式不方便携带请求失败的异常信息（只能放在 URL 中）
+	 *
 	 * The URL to send users if authentication fails. This is a shortcut for invoking
 	 * {@link #failureHandler(AuthenticationFailureHandler)}. The default is
 	 * "/login?error".
@@ -213,6 +216,8 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 	}
 
 	/**
+	 * 配置登录失败处理
+	 *
 	 * Specifies the {@link AuthenticationFailureHandler} to use when authentication
 	 * fails. The default is redirecting to "/login?error" using
 	 * {@link SimpleUrlAuthenticationFailureHandler}

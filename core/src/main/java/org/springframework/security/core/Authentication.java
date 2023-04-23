@@ -46,6 +46,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * In most cases, the framework transparently takes care of managing the security context
  * and authentication objects for you.
  *
+ * 保存了登录成功的用户信息
+ *
  * @author Ben Alex
  */
 public interface Authentication extends Principal, Serializable {
@@ -59,12 +61,17 @@ public interface Authentication extends Principal, Serializable {
 	 * do not affect the state of the Authentication object, or use an unmodifiable
 	 * instance.
 	 * </p>
+	 *
+	 * 获取用户权限
+	 *
 	 * @return the authorities granted to the principal, or an empty collection if the
 	 * token has not been authenticated. Never null.
 	 */
 	Collection<? extends GrantedAuthority> getAuthorities();
 
 	/**
+	 * 获取用户凭证，一般来说就是密码
+	 *
 	 * The credentials that prove the principal is correct. This is usually a password,
 	 * but could be anything relevant to the <code>AuthenticationManager</code>. Callers
 	 * are expected to populate the credentials.
@@ -73,6 +80,8 @@ public interface Authentication extends Principal, Serializable {
 	Object getCredentials();
 
 	/**
+	 * 获取用户的详细信息，可能是当前的请求之类
+	 *
 	 * Stores additional details about the authentication request. These might be an IP
 	 * address, certificate serial number etc.
 	 * @return additional details about the authentication request, or <code>null</code>
@@ -81,6 +90,8 @@ public interface Authentication extends Principal, Serializable {
 	Object getDetails();
 
 	/**
+	 * 获取当前用户信息，可能是一个用户名，也可能是一个用户对象
+	 *
 	 * The identity of the principal being authenticated. In the case of an authentication
 	 * request with username and password, this would be the username. Callers are
 	 * expected to populate the principal for an authentication request.
@@ -95,6 +106,8 @@ public interface Authentication extends Principal, Serializable {
 	Object getPrincipal();
 
 	/**
+	 * 当前用户是否认证成功
+	 *
 	 * Used to indicate to {@code AbstractSecurityInterceptor} whether it should present
 	 * the authentication token to the <code>AuthenticationManager</code>. Typically an
 	 * <code>AuthenticationManager</code> (or, more often, one of its

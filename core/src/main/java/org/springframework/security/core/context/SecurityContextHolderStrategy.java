@@ -27,11 +27,15 @@ package org.springframework.security.core.context;
 public interface SecurityContextHolderStrategy {
 
 	/**
+	 * 清除存储的 SecurityContext 对象
+	 *
 	 * Clears the current context.
 	 */
 	void clearContext();
 
 	/**
+	 * 获取存储的 SecurityContext 对象
+	 *
 	 * Obtains the current context.
 	 * @return a context (never <code>null</code> - create a default implementation if
 	 * necessary)
@@ -39,6 +43,8 @@ public interface SecurityContextHolderStrategy {
 	SecurityContext getContext();
 
 	/**
+	 * 设置存储的 SecurityContext 对象
+	 *
 	 * Sets the current context.
 	 * @param context to the new argument (should never be <code>null</code>, although
 	 * implementations must check if <code>null</code> has been passed and throw an
@@ -47,6 +53,8 @@ public interface SecurityContextHolderStrategy {
 	void setContext(SecurityContext context);
 
 	/**
+	 *  创建一个空的 SecurityContext 对象
+	 *
 	 * Creates a new, empty context implementation, for use by
 	 * <tt>SecurityContextRepository</tt> implementations, when creating a new context for
 	 * the first time.

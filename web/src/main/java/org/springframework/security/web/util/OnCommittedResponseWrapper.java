@@ -101,6 +101,9 @@ public abstract class OnCommittedResponseWrapper extends HttpServletResponseWrap
 	}
 
 	/**
+	 * 对 HttpServletResponseWrapper 进行了增强，当 HttpServletResponse 的 sendError()、sendRedirect()、flushBuffer、flush 及 close 等方法被调用时
+	 * 该方法会被触发
+	 *
 	 * Implement the logic for handling the {@link javax.servlet.http.HttpServletResponse}
 	 * being committed
 	 */

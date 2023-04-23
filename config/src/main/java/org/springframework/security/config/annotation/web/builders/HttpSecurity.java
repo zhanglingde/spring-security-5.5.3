@@ -1623,6 +1623,9 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 	 * 	}
 	 * }
 	 * </pre>
+	 *
+	 * 启用注销登录
+	 *
 	 * @return the {@link LogoutConfigurer} for further customizations
 	 * @throws Exception
 	 */
@@ -1873,6 +1876,9 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 	 * 	}
 	 * }
 	 * </pre>
+	 *
+	 * 表单登录配置
+	 *
 	 * @return the {@link FormLoginConfigurer} for further customizations
 	 * @throws Exception
 	 * @see FormLoginConfigurer#loginPage(String)

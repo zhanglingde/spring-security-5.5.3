@@ -23,7 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .defaultSuccessUrl("/index")
                 .successHandler(new MyAuthenticationSuccessHandler())
 //               重定向客户端跳转，不方便携带请求失败的异常信息（只能放在 URL 中）
-//                .failureUrl("/mylogin.html")
+               .failureUrl("/mylogin.html")
 //                .failureForwardUrl("/mylogin.html")
                 .failureHandler(new MyAuthenticationFailureHandler())
                 .usernameParameter("uname")

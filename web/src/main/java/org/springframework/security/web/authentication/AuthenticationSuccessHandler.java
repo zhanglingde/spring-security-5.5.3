@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 
 /**
+ * 登录认证成功的处理
+ *
  * Strategy used to handle a successful user authentication.
  * <p>
  * Implementations can do whatever they want but typical behaviour would be to control the
@@ -41,6 +43,8 @@ import org.springframework.security.core.Authentication;
 public interface AuthenticationSuccessHandler {
 
 	/**
+	 * 处理特定的认证请求 Authentication Filter 中会用到
+	 *
 	 * Called when a user has been successfully authenticated.
 	 * @param request the request which caused the successful authentication
 	 * @param response the response
@@ -57,6 +61,8 @@ public interface AuthenticationSuccessHandler {
 	}
 
 	/**
+	 * 处理登录成功的具体事项； Authentication 对象保存了登录成功的用户信息
+	 *
 	 * Called when a user has been successfully authenticated.
 	 * @param request the request which caused the successful authentication
 	 * @param response the response

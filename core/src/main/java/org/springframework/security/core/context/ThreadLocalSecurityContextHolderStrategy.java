@@ -19,6 +19,9 @@ package org.springframework.security.core.context;
 import org.springframework.util.Assert;
 
 /**
+ * 默认存储策略，该策略将 SecurityContext 存放在 ThreadLocal 中，一个请求无论经过多少 Filter 到达 Servlet ，
+ * 都是由一个线程处理的，所以在该线程中都能获取到用户信息。但是如果在业务处理代码中，开启了子线程，在子线程获取登录用户信息，就会获取不到
+ *
  * A <code>ThreadLocal</code>-based implementation of
  * {@link SecurityContextHolderStrategy}.
  *
@@ -28,10 +31,12 @@ import org.springframework.util.Assert;
  */
 final class ThreadLocalSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 
+	// 使用 ThreadLocal 存储 SecurityContext
 	private static final ThreadLocal<SecurityContext> contextHolder = new ThreadLocal<>();
 
 	@Override
 	public void clearContext() {
+		// 清空时是对 ThreadLocal 的移除
 		contextHolder.remove();
 	}
 
@@ -53,6 +58,7 @@ final class ThreadLocalSecurityContextHolderStrategy implements SecurityContextH
 
 	@Override
 	public SecurityContext createEmptyContext() {
+		// SecurityContext 接口只有一个实现类，直接创建实现类对象
 		return new SecurityContextImpl();
 	}
 

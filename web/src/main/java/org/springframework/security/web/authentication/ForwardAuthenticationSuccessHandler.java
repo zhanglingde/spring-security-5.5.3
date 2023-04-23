@@ -27,6 +27,8 @@ import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 
 /**
+ * 重定向登录成功处理器：通过 successForwardUrl 设置登录后重定向地址时
+ *
  * <p>
  * Forward Authentication Success Handler
  * </p>
@@ -50,6 +52,7 @@ public class ForwardAuthenticationSuccessHandler implements AuthenticationSucces
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
+		// 服务端转发
 		request.getRequestDispatcher(this.forwardUrl).forward(request, response);
 	}
 

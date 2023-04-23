@@ -201,6 +201,8 @@ public final class LogoutConfigurer<H extends HttpSecurityBuilder<H>>
 	}
 
 	/**
+	 * 配置退出登录处理器
+	 *
 	 * Sets the {@link LogoutSuccessHandler} to use. If this is specified,
 	 * {@link #logoutSuccessUrl(String)} is ignored.
 	 * @param logoutSuccessHandler the {@link LogoutSuccessHandler} to use after a user

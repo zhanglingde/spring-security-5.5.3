@@ -19,6 +19,8 @@ package org.springframework.security.core.context;
 import org.springframework.util.Assert;
 
 /**
+ * 这种存储模式适用于多线程环境，如果希望子线程中也能够获取到登录用户数据，那么可以使用这种存储模式
+ *
  * An <code>InheritableThreadLocal</code>-based implementation of
  * {@link org.springframework.security.core.context.SecurityContextHolderStrategy}.
  *
@@ -27,6 +29,7 @@ import org.springframework.util.Assert;
  */
 final class InheritableThreadLocalSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 
+	// InheritableThreadLocal 继承自 ThreadLocal,但多了一个特性，在子线程创建的瞬间，会自动将父线程的数据复制到子线程中
 	private static final ThreadLocal<SecurityContext> contextHolder = new InheritableThreadLocal<>();
 
 	@Override

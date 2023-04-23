@@ -55,6 +55,9 @@ import org.springframework.web.filter.GenericFilterBean;
  * always available before the filter chain executes (the default is <code>false</code>,
  * as this is resource intensive and not recommended).
  *
+ * 该过滤器存储 SecurityContext
+ * SecurityContextPersistenceFilter 是第二道防线，位于 WebAsyncManagerIntegrationFilter 之后
+ *
  * @author Luke Taylor
  * @since 3.0
  */
@@ -95,6 +98,7 @@ public class SecurityContextPersistenceFilter extends GenericFilterBean {
 			}
 		}
 		HttpRequestResponseHolder holder = new HttpRequestResponseHolder(request, response);
+		// 1. 从 HttpSession 中获取 SecurityContext
 		SecurityContext contextBeforeChainExecution = this.repo.loadContext(holder);
 		try {
 			SecurityContextHolder.setContext(contextBeforeChainExecution);
@@ -103,16 +107,17 @@ public class SecurityContextPersistenceFilter extends GenericFilterBean {
 			}
 			else {
 				if (this.logger.isDebugEnabled()) {
-					this.logger
-							.debug(LogMessage.format("Set SecurityContextHolder to %s", contextBeforeChainExecution));
+					this.logger.debug(LogMessage.format("Set SecurityContextHolder to %s", contextBeforeChainExecution));
 				}
 			}
+			// 执行请求
 			chain.doFilter(holder.getRequest(), holder.getResponse());
 		}
 		finally {
 			SecurityContext contextAfterChainExecution = SecurityContextHolder.getContext();
 			// Crucial removal of SecurityContextHolder contents before anything else.
 			SecurityContextHolder.clearContext();
+			// 2. 请求结束后保存 SecurityContext 到 HttpSession
 			this.repo.saveContext(contextAfterChainExecution, holder.getRequest(), holder.getResponse());
 			request.removeAttribute(FILTER_APPLIED);
 			this.logger.debug("Cleared SecurityContextHolder to complete request");

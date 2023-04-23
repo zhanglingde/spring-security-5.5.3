@@ -44,11 +44,14 @@ import org.springframework.util.StringUtils;
  * compatible, has fewer JVM incompatibilities and is appropriate on servers (whereas
  * {@link #MODE_GLOBAL} is definitely inappropriate for server use).
  *
+ * 存储用户登录数据，定义了三种不同的数据存储策略
+ *
  * @author Ben Alex
  *
  */
 public class SecurityContextHolder {
 
+	// 默认存储策略
 	public static final String MODE_THREADLOCAL = "MODE_THREADLOCAL";
 
 	public static final String MODE_INHERITABLETHREADLOCAL = "MODE_INHERITABLETHREADLOCAL";
@@ -63,6 +66,9 @@ public class SecurityContextHolder {
 
 	private static int initializeCount = 0;
 
+	/**
+	 * 静态代码块初始化策略
+	 */
 	static {
 		initialize();
 	}
@@ -73,12 +79,16 @@ public class SecurityContextHolder {
 			strategyName = MODE_THREADLOCAL;
 		}
 		if (strategyName.equals(MODE_THREADLOCAL)) {
+			// 1. 默认存储策略，该策略将 SecurityContext 存放在 ThreadLocal 中，一个请求无论经过多少 Filter 到达 Servlet ，
+			// 都是由一个线程处理的，所以在该线程中都能获取到用户信息。但是如果在业务处理代码中，开启了子线程，在子线程获取登录用户信息，就会获取不到
 			strategy = new ThreadLocalSecurityContextHolderStrategy();
 		}
 		else if (strategyName.equals(MODE_INHERITABLETHREADLOCAL)) {
+			// 2. 这种存储模式适用于多线程环境，如果希望子线程中也能够获取到登录用户数据，那么可以使用这种存储模式
 			strategy = new InheritableThreadLocalSecurityContextHolderStrategy();
 		}
 		else if (strategyName.equals(MODE_GLOBAL)) {
+			// 3. 该存储模式实际上是将数据保存在一个静态变量中，在 Java Web 开发中，这种模式很少使用到
 			strategy = new GlobalSecurityContextHolderStrategy();
 		}
 		else {
@@ -129,6 +139,8 @@ public class SecurityContextHolder {
 	}
 
 	/**
+	 * 修改 SecurityContextHolder 中的存储策略，调用该方法后会重新初始化 strategy
+	 *
 	 * Changes the preferred strategy. Do <em>NOT</em> call this method more than once for
 	 * a given JVM, as it will re-initialize the strategy and adversely affect any
 	 * existing threads using the old strategy.

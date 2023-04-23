@@ -19,6 +19,8 @@ package org.springframework.security.core.context;
 import org.springframework.util.Assert;
 
 /**
+ * 该存储模式实际上是将数据保存在一个静态变量中，在 Java Web 开发中，这种模式很少使用到
+ *
  * A <code>static</code> field-based implementation of
  * {@link SecurityContextHolderStrategy}.
  * <p>
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
  */
 final class GlobalSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 
+	// 使用静态变量保存
 	private static SecurityContext contextHolder;
 
 	@Override
