@@ -170,17 +170,19 @@ public class ProviderManager implements AuthenticationManager, MessageSourceAwar
 		Authentication parentResult = null;
 		int currentPosition = 0;
 		int size = this.providers.size();
+		// 1. 获取所有认证处理对象，遍历进行身份认证
 		for (AuthenticationProvider provider : getProviders()) {
 			if (!provider.supports(toTest)) {
 				continue;
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace(LogMessage.format("Authenticating request with %s (%d/%d)",
-						provider.getClass().getSimpleName(), ++currentPosition, size));
+				logger.trace(LogMessage.format("Authenticating request with %s (%d/%d)", provider.getClass().getSimpleName(), ++currentPosition, size));
 			}
 			try {
+				// 2. 进行身份认证
 				result = provider.authenticate(authentication);
 				if (result != null) {
+					// 3. 认证成功后，进行认证详细信息属性赋值
 					copyDetails(authentication, result);
 					break;
 				}
@@ -195,6 +197,7 @@ public class ProviderManager implements AuthenticationManager, MessageSourceAwar
 				lastException = ex;
 			}
 		}
+		// 4. 所有身份认证后失败，调用 parent 进行身份认证
 		if (result == null && this.parent != null) {
 			// Allow the parent to try.
 			try {
@@ -213,6 +216,7 @@ public class ProviderManager implements AuthenticationManager, MessageSourceAwar
 			}
 		}
 		if (result != null) {
+			// 5. 认证成功后，将结果中的凭证擦除，防止泄漏（将密码设置为 null）
 			if (this.eraseCredentialsAfterAuthentication && (result instanceof CredentialsContainer)) {
 				// Authentication is complete. Remove credentials and other secret data
 				// from authentication
@@ -225,11 +229,12 @@ public class ProviderManager implements AuthenticationManager, MessageSourceAwar
 			if (parentResult == null) {
 				this.eventPublisher.publishAuthenticationSuccess(result);
 			}
-
+			// 6. 返回认证成功后的数据
 			return result;
 		}
 
 		// Parent was null, or didn't authenticate (or throw an exception).
+		// 认证失败，lastException 为 null；说明 parent  为 null 或者没有认证亦或者认证失败了但是没有抛出异常
 		if (lastException == null) {
 			lastException = new ProviderNotFoundException(this.messages.getMessage("ProviderManager.providerNotFound",
 					new Object[] { toTest.getName() }, "No AuthenticationProvider found for {0}"));
@@ -238,6 +243,7 @@ public class ProviderManager implements AuthenticationManager, MessageSourceAwar
 		// publish an AbstractAuthenticationFailureEvent
 		// This check prevents a duplicate AbstractAuthenticationFailureEvent if the
 		// parent AuthenticationManager already published it
+		// parentException 为  null；发布认证失败事件（parentException 不为 null，说明认证失败事件已经发布过了）
 		if (parentException == null) {
 			prepareException(lastException, authentication);
 		}

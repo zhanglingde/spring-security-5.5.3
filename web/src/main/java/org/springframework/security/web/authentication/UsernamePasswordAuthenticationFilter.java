@@ -51,6 +51,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 
 	public static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "password";
 
+	/**
+	 * 表示该过滤器只处理登录请求，默认的登录请求是 /login
+	 */
 	private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login",
 			"POST");
 
@@ -71,9 +74,11 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
+		// 1. 登录请求需要是 post 请求
 		if (this.postOnly && !request.getMethod().equals("POST")) {
 			throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
 		}
+		// 2. 获取用户名和密码
 		String username = obtainUsername(request);
 		username = (username != null) ? username : "";
 		username = username.trim();
@@ -82,6 +87,7 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
 		// Allow subclasses to set the "details" property
 		setDetails(request, authRequest);
+		// 3. 进行身份认证
 		return this.getAuthenticationManager().authenticate(authRequest);
 	}
 

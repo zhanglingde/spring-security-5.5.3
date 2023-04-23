@@ -20,6 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 /**
+ * Spring Security 默认的认证流程
+ *
  * Indicates a class can process a specific
  * {@link org.springframework.security.core.Authentication} implementation.
  *
@@ -28,6 +30,8 @@ import org.springframework.security.core.AuthenticationException;
 public interface AuthenticationProvider {
 
 	/**
+	 * 执行具体的身份认证
+	 *
 	 * Performs authentication with the same contract as
 	 * {@link org.springframework.security.authentication.AuthenticationManager#authenticate(Authentication)}
 	 * .
@@ -42,6 +46,8 @@ public interface AuthenticationProvider {
 	Authentication authenticate(Authentication authentication) throws AuthenticationException;
 
 	/**
+	 * 判断当前 AuthenticationProvider 是否支持对应的身份类型
+	 *
 	 * Returns <code>true</code> if this <Code>AuthenticationProvider</code> supports the
 	 * indicated <Code>Authentication</code> object.
 	 * <p>

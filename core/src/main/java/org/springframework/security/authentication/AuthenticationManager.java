@@ -20,6 +20,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 /**
+ * 认证管理器
+ * 认证成功后会返回一个 Authentication 对象，然后对象被设置到 SecurityContextHolder 中
+ * 可以自定义认证流程，认证成功后，手动将 Authentication 存储 SecurityContextHolder 中
+ *
  * Processes an {@link Authentication} request.
  *
  * @author Ben Alex
@@ -27,6 +31,8 @@ import org.springframework.security.core.AuthenticationException;
 public interface AuthenticationManager {
 
 	/**
+	 * 对参数 Authentication 进行认证，默认实现是 ProviderManager
+	 *
 	 * Attempts to authenticate the passed {@link Authentication} object, returning a
 	 * fully populated <code>Authentication</code> object (including granted authorities)
 	 * if successful.

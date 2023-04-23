@@ -67,6 +67,7 @@ public class SecurityContextPersistenceFilter extends GenericFilterBean {
 
 	private SecurityContextRepository repo;
 
+	// 表示是否要在过滤器链执行之前确保会话有效（比较耗费资源的操作，默认为 false）
 	private boolean forceEagerSessionCreation = false;
 
 	public SecurityContextPersistenceFilter() {

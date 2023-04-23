@@ -40,6 +40,8 @@ import org.springframework.util.Assert;
 public class DaoAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
 	/**
+	 *  用户查找失败时的默认密码
+	 *
 	 * The plaintext password used to perform PasswordEncoder#matches(CharSequence,
 	 * String)} on when the user is not found to avoid SEC-2056.
 	 */
@@ -63,6 +65,11 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 		setPasswordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder());
 	}
 
+
+	/**
+	 * 主要进行密码校验，userDetails 是从数据库中查询出来的用户对象，authentication 登录用户输入的参数
+	 * 从这两个参数中分别提取出来用户密码，然后调用 passwordEncoder.matchs 方法进行密码比对
+	 */
 	@Override
 	@SuppressWarnings("deprecation")
 	protected void additionalAuthenticationChecks(UserDetails userDetails,
@@ -90,6 +97,7 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 			throws AuthenticationException {
 		prepareTimingAttackProtection();
 		try {
+			// 根据用户名查询数据库中用户详情
 			UserDetails loadedUser = this.getUserDetailsService().loadUserByUsername(username);
 			if (loadedUser == null) {
 				throw new InternalAuthenticationServiceException(
@@ -109,9 +117,12 @@ public class DaoAuthenticationProvider extends AbstractUserDetailsAuthentication
 		}
 	}
 
+	/**
+	 * 登录成功后，创建一个全新的 UsernamePasswordAuthenticationToken 对象，同时判断是否需要进行密码升级，
+	 * 如果需要升级，会在该方法中进行加密方案升级
+	 */
 	@Override
-	protected Authentication createSuccessAuthentication(Object principal, Authentication authentication,
-			UserDetails user) {
+	protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
 		boolean upgradeEncoding = this.userDetailsPasswordService != null
 				&& this.passwordEncoder.upgradeEncoding(user.getPassword());
 		if (upgradeEncoding) {

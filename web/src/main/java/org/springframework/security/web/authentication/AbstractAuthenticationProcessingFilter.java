@@ -105,6 +105,8 @@ import org.springframework.web.filter.GenericFilterBean;
  * can be injected} to enable things like session-fixation attack prevention or to control
  * the number of simultaneous sessions a principal may have.
  *
+ * 身份认证过滤器
+ *
  * @author Ben Alex
  * @author Luke Taylor
  */
@@ -123,6 +125,9 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 
 	private RequestMatcher requiresAuthenticationRequestMatcher;
 
+	/**
+	 * 判断请求是否还需要继续往下走
+	 */
 	private boolean continueChainBeforeSuccessfulAuthentication = false;
 
 	private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
@@ -214,21 +219,26 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		// 1. 判断是否是登录认证请求，不是认证请求直接跳过走其他过滤器
 		if (!requiresAuthentication(request, response)) {
 			chain.doFilter(request, response);
 			return;
 		}
 		try {
+			// 2. 获取一个经过认证后的 Authentication（子类实现 UsernamePasswordAuthentication）
 			Authentication authenticationResult = attemptAuthentication(request, response);
 			if (authenticationResult == null) {
 				// return immediately as subclass has indicated that it hasn't completed
 				return;
 			}
+			// 3. 认证成功，通过该方法处理 session 并发问题
 			this.sessionStrategy.onAuthentication(authenticationResult, request, response);
 			// Authentication success
+			// 4. 认证成功后，后续的过滤器将不再执行
 			if (this.continueChainBeforeSuccessfulAuthentication) {
 				chain.doFilter(request, response);
 			}
+			// 5. 处理认证成功
 			successfulAuthentication(request, response, chain, authenticationResult);
 		}
 		catch (InternalAuthenticationServiceException failed) {
@@ -237,6 +247,7 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 		}
 		catch (AuthenticationException ex) {
 			// Authentication failed
+			// 5. 处理认证失败
 			unsuccessfulAuthentication(request, response, ex);
 		}
 	}
@@ -258,8 +269,7 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 			return true;
 		}
 		if (this.logger.isTraceEnabled()) {
-			this.logger
-					.trace(LogMessage.format("Did not match request to %s", this.requiresAuthenticationRequestMatcher));
+			this.logger.trace(LogMessage.format("Did not match request to %s", this.requiresAuthenticationRequestMatcher));
 		}
 		return false;
 	}
@@ -310,14 +320,19 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 	 */
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
+		// 1. 向 SecurityContextHolder 中存入用户信息
 		SecurityContextHolder.getContext().setAuthentication(authResult);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(LogMessage.format("Set SecurityContextHolder to %s", authResult));
 		}
+		// 2. 处理 Cookie
 		this.rememberMeServices.loginSuccess(request, response, authResult);
+		// 3. 发步认证成功事件
 		if (this.eventPublisher != null) {
+			// 表示通过一些自动交互的方式认证成功，例如通过 RememberMe 的方式登录
 			this.eventPublisher.publishEvent(new InteractiveAuthenticationSuccessEvent(authResult, this.getClass()));
 		}
+		// 4. 调用认证成功的回调方法
 		this.successHandler.onAuthenticationSuccess(request, response, authResult);
 	}
 
@@ -334,11 +349,14 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 	 */
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException failed) throws IOException, ServletException {
+		// 1. SecurityContextHolder 清除数据
 		SecurityContextHolder.clearContext();
 		this.logger.trace("Failed to process authentication request", failed);
 		this.logger.trace("Cleared SecurityContextHolder");
 		this.logger.trace("Handling authentication failure");
+		// 2. 清除 Cookie 等信息
 		this.rememberMeServices.loginFail(request, response);
+		// 3. 调用认证失败的回调方法
 		this.failureHandler.onAuthenticationFailure(request, response, failed);
 	}
 

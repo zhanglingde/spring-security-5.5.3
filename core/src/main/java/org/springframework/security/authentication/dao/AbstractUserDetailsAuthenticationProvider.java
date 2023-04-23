@@ -81,10 +81,19 @@ public abstract class AbstractUserDetailsAuthenticationProvider
 
 	protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
+	/**
+	 * 声明一个用户缓存对象 useCache
+	 */
 	private UserCache userCache = new NullUserCache();
 
+	/**
+	 * 表示是否强制将 Principal 对象当成字符串来处理，默认是 false
+	 */
 	private boolean forcePrincipalAsString = false;
 
+	/**
+	 * 表示是否隐藏用户名查找失败的异常，默认为 true
+	 */
 	protected boolean hideUserNotFoundExceptions = true;
 
 	private UserDetailsChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
@@ -124,12 +133,15 @@ public abstract class AbstractUserDetailsAuthenticationProvider
 		Assert.isInstanceOf(UsernamePasswordAuthenticationToken.class, authentication,
 				() -> this.messages.getMessage("AbstractUserDetailsAuthenticationProvider.onlySupports",
 						"Only UsernamePasswordAuthenticationToken is supported"));
+		// 1. 先从登录数据中获取用户名
 		String username = determineUsername(authentication);
 		boolean cacheWasUsed = true;
+		// 2. 根据用户名去缓存中查询用户对象
 		UserDetails user = this.userCache.getUserFromCache(username);
 		if (user == null) {
 			cacheWasUsed = false;
 			try {
+				// 缓存中没有用户对象，根据用户名调用 retrieveUser 方法从数据库中加载用户
 				user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
 			}
 			catch (UsernameNotFoundException ex) {
@@ -137,13 +149,16 @@ public abstract class AbstractUserDetailsAuthenticationProvider
 				if (!this.hideUserNotFoundExceptions) {
 					throw ex;
 				}
+				// 没有加载到用户，则抛出异常（用户不存在异常会被隐藏）
 				throw new BadCredentialsException(this.messages
 						.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
 			}
 			Assert.notNull(user, "retrieveUser returned null - a violation of the interface contract");
 		}
 		try {
+			// 3. 进行用户状态检查
 			this.preAuthenticationChecks.check(user);
+			// 4. 进行密码的校验操作
 			additionalAuthenticationChecks(user, (UsernamePasswordAuthenticationToken) authentication);
 		}
 		catch (AuthenticationException ex) {
@@ -157,6 +172,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider
 			this.preAuthenticationChecks.check(user);
 			additionalAuthenticationChecks(user, (UsernamePasswordAuthenticationToken) authentication);
 		}
+		// 5. 检查密码是否过期
 		this.postAuthenticationChecks.check(user);
 		if (!cacheWasUsed) {
 			this.userCache.putUserInCache(user);
@@ -165,6 +181,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider
 		if (this.forcePrincipalAsString) {
 			principalToReturn = user.getUsername();
 		}
+		// 6. 所有步骤顺利完成后，创建一个认证后的 UsernamePasswordAuthenticationToken 对象并返回，认证后的对象中包含了认证主体、凭证以及角色信息
 		return createSuccessAuthentication(principalToReturn, authentication, user);
 	}
 
