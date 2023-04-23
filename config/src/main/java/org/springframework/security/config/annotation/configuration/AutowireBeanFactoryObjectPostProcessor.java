@@ -54,6 +54,12 @@ final class AutowireBeanFactoryObjectPostProcessor
 		this.autowireBeanFactory = autowireBeanFactory;
 	}
 
+	/**
+	 * 将对象注入到 Spring 容器中
+	 * @param object the object to initialize
+	 * @return
+	 * @param <T>
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T postProcess(T object) {
@@ -68,6 +74,7 @@ final class AutowireBeanFactoryObjectPostProcessor
 			Class<?> type = object.getClass();
 			throw new RuntimeException("Could not postProcess " + object + " of type " + type, ex);
 		}
+		// 将对象注入 Spring 容器中
 		this.autowireBeanFactory.autowireBean(object);
 		if (result instanceof DisposableBean) {
 			this.disposableBeans.add((DisposableBean) result);

@@ -28,13 +28,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class AbstractSecurityBuilder<O> implements SecurityBuilder<O> {
 
+	// 确保即使在多线程环境下，配置类也只构建一次
 	private AtomicBoolean building = new AtomicBoolean();
 
 	private O object;
 
 	@Override
 	public final O build() throws Exception {
+		// 声明为 final ,确保子类不重写该方法，确保配置类只构建一次
 		if (this.building.compareAndSet(false, true)) {
+			// 具体构建
 			this.object = doBuild();
 			return this.object;
 		}

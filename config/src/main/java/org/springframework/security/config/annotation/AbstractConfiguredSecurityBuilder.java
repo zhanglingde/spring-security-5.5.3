@@ -377,17 +377,23 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	private enum BuildState {
 
 		/**
+		 * 配置类构建前
+		 *
 		 * This is the state before the {@link Builder#build()} is invoked
 		 */
 		UNBUILT(0),
 
 		/**
+		 * 初始化中（初始化完成之前是该状态）
+		 *
 		 * The state from when {@link Builder#build()} is first invoked until all the
 		 * {@link SecurityConfigurer#init(SecurityBuilder)} methods have been invoked.
 		 */
 		INITIALIZING(1),
 
 		/**
+		 * 配置中（开始构建之前是该状态）
+		 *
 		 * The state from after all {@link SecurityConfigurer#init(SecurityBuilder)} have
 		 * been invoked until after all the
 		 * {@link SecurityConfigurer#configure(SecurityBuilder)} methods have been
@@ -396,6 +402,8 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 		CONFIGURING(2),
 
 		/**
+		 * 构建中
+		 *
 		 * From the point after all the
 		 * {@link SecurityConfigurer#configure(SecurityBuilder)} have completed to just
 		 * after {@link AbstractConfiguredSecurityBuilder#performBuild()}.
@@ -403,6 +411,8 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 		BUILDING(3),
 
 		/**
+		 * 构建完成
+		 *
 		 * After the object has been completely built.
 		 */
 		BUILT(4);
@@ -418,6 +428,8 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 		}
 
 		/**
+		 * 是否已完成配置
+		 *
 		 * Determines if the state is CONFIGURING or later
 		 * @return
 		 */

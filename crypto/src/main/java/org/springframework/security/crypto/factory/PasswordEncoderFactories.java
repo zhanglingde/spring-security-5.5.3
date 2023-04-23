@@ -38,6 +38,8 @@ public final class PasswordEncoderFactories {
 	}
 
 	/**
+	 * 创建一个 PasswordEncoder
+	 *
 	 * Creates a {@link DelegatingPasswordEncoder} with default mappings. Additional
 	 * mappings may be added and the encoding will be updated to conform with best
 	 * practices. However, due to the nature of {@link DelegatingPasswordEncoder} the
@@ -64,6 +66,7 @@ public final class PasswordEncoderFactories {
 	 */
 	@SuppressWarnings("deprecation")
 	public static PasswordEncoder createDelegatingPasswordEncoder() {
+		// 默认加密方案
 		String encodingId = "bcrypt";
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
 		encoders.put(encodingId, new BCryptPasswordEncoder());

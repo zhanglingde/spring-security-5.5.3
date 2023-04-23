@@ -125,12 +125,16 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 
 	private static final String SUFFIX = "}";
 
+	// 默认的加密方案 id
 	private final String idForEncode;
 
+	// 默认的加密方案 BCryptPasswordEncoder
 	private final PasswordEncoder passwordEncoderForEncode;
 
+	// 保存加密方案映射关系
 	private final Map<String, PasswordEncoder> idToPasswordEncoder;
 
+	// 默认密码比对器（默认实现不会进行密码比对，直接抛出异常）
 	private PasswordEncoder defaultPasswordEncoderForMatches = new UnmappedIdPasswordEncoder();
 
 	/**

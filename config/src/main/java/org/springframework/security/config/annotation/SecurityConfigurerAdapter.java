@@ -99,6 +99,8 @@ public abstract class SecurityConfigurerAdapter<O, B extends SecurityBuilder<O>>
 	}
 
 	/**
+	 * 一个对象有多个后置处理器
+	 *
 	 * An {@link ObjectPostProcessor} that delegates work to numerous
 	 * {@link ObjectPostProcessor} implementations.
 	 *

@@ -52,6 +52,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 		extends SecurityBuilder<DefaultSecurityFilterChain> {
 
 	/**
+	 * 获取一个配置器（xxxConfigurer）
+	 *
 	 * Gets the {@link SecurityConfigurer} by its class name or <code>null</code> if not
 	 * found. Note that object hierarchies are not considered.
 	 * @param clazz the Class of the {@link SecurityConfigurer} to attempt to get.
@@ -59,6 +61,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	<C extends SecurityConfigurer<DefaultSecurityFilterChain, H>> C getConfigurer(Class<C> clazz);
 
 	/**
+	 * 从过滤器链中移除一个过滤器
+	 *
 	 * Removes the {@link SecurityConfigurer} by its class name or <code>null</code> if
 	 * not found. Note that object hierarchies are not considered.
 	 * @param clazz the Class of the {@link SecurityConfigurer} to attempt to remove.
@@ -67,6 +71,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	<C extends SecurityConfigurer<DefaultSecurityFilterChain, H>> C removeConfigurer(Class<C> clazz);
 
 	/**
+	 * 设置一个可以在多个配置器之间共享的对象
+	 *
 	 * Sets an object that is shared by multiple {@link SecurityConfigurer}.
 	 * @param sharedType the Class to key the shared object by.
 	 * @param object the Object to store
@@ -81,6 +87,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	<C> C getSharedObject(Class<C> sharedType);
 
 	/**
+	 * 配置一个认证器 AuthenticationProvider
+	 *
 	 * Allows adding an additional {@link AuthenticationProvider} to be used
 	 * @param authenticationProvider the {@link AuthenticationProvider} to be added
 	 * @return the {@link HttpSecurity} for further customizations
@@ -88,6 +96,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	H authenticationProvider(AuthenticationProvider authenticationProvider);
 
 	/**
+	 * 配置一个数据源 UserDetailsService
+	 *
 	 * Allows adding an additional {@link UserDetailsService} to be used
 	 * @param userDetailsService the {@link UserDetailsService} to be added
 	 * @return the {@link HttpSecurity} for further customizations
@@ -95,6 +105,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	H userDetailsService(UserDetailsService userDetailsService) throws Exception;
 
 	/**
+	 * 在某一个过滤器之后添加一个自定义过滤器
+	 *
 	 * Allows adding a {@link Filter} after one of the known {@link Filter} classes. The
 	 * known {@link Filter} instances are either a {@link Filter} listed in
 	 * {@link #addFilter(Filter)} or a {@link Filter} that has already been added using
@@ -149,6 +161,9 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 	 * <li>{@link FilterSecurityInterceptor}</li>
 	 * <li>{@link SwitchUserFilter}</li>
 	 * </ul>
+	 *
+	 * 添加一个过滤器，必须是 Spring Security 框架提供的过滤器的一个实例或者其扩展，添加完成后，会自动进行过滤器的排序
+	 *
 	 * @param filter the {@link Filter} to add
 	 * @return the {@link HttpSecurity} for further customizations
 	 */
