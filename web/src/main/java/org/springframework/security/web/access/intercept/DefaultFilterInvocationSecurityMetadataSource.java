@@ -56,6 +56,10 @@ public class DefaultFilterInvocationSecurityMetadataSource implements FilterInvo
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * key 请求匹配器,保存了请求 URL 和其所需权限之间的映射关系
+	 * value 权限集合
+	 */
 	private final Map<RequestMatcher, Collection<ConfigAttribute>> requestMap;
 
 	/**
@@ -64,8 +68,7 @@ public class DefaultFilterInvocationSecurityMetadataSource implements FilterInvo
 	 * type of the supplied UrlMatcher.
 	 * @param requestMap order-preserving map of request definitions to attribute lists
 	 */
-	public DefaultFilterInvocationSecurityMetadataSource(
-			LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap) {
+	public DefaultFilterInvocationSecurityMetadataSource(LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap) {
 		this.requestMap = requestMap;
 	}
 

@@ -43,6 +43,8 @@ import org.springframework.security.core.GrantedAuthority;
 public interface UserDetails extends Serializable {
 
 	/**
+	 * 返回用户的权限
+	 *
 	 * Returns the authorities granted to the user. Cannot return <code>null</code>.
 	 * @return the authorities, sorted by natural key (never <code>null</code>)
 	 */

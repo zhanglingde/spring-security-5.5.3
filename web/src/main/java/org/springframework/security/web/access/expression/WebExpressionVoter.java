@@ -43,21 +43,23 @@ public class WebExpressionVoter implements AccessDecisionVoter<FilterInvocation>
 	private SecurityExpressionHandler<FilterInvocation> expressionHandler = new DefaultWebSecurityExpressionHandler();
 
 	@Override
-	public int vote(Authentication authentication, FilterInvocation filterInvocation,
-			Collection<ConfigAttribute> attributes) {
+	public int vote(Authentication authentication, FilterInvocation filterInvocation, Collection<ConfigAttribute> attributes) {
 		Assert.notNull(authentication, "authentication must not be null");
 		Assert.notNull(filterInvocation, "filterInvocation must not be null");
 		Assert.notNull(attributes, "attributes must not be null");
+		// 1. 获取受保护对象配置的权限表达式(允许访问)
 		WebExpressionConfigAttribute webExpressionConfigAttribute = findConfigAttribute(attributes);
 		if (webExpressionConfigAttribute == null) {
-			this.logger
-					.trace("Abstained since did not find a config attribute of instance WebExpressionConfigAttribute");
+			this.logger.trace("Abstained since did not find a config attribute of instance WebExpressionConfigAttribute");
+			// 弃权投票
 			return ACCESS_ABSTAIN;
 		}
-		EvaluationContext ctx = webExpressionConfigAttribute.postProcess(
-				this.expressionHandler.createEvaluationContext(authentication, filterInvocation), filterInvocation);
+		// 2. 创建表达式上下文对象
+		EvaluationContext ctx = webExpressionConfigAttribute.postProcess(this.expressionHandler.createEvaluationContext(authentication, filterInvocation), filterInvocation);
+		// 3. 计算表达式,比较用户权限 和 受保护对象需要的权限
 		boolean granted = ExpressionUtils.evaluateAsBoolean(webExpressionConfigAttribute.getAuthorizeExpression(), ctx);
 		if (granted) {
+			// 4. 投票通过
 			return ACCESS_GRANTED;
 		}
 		this.logger.trace("Voted to deny authorization");

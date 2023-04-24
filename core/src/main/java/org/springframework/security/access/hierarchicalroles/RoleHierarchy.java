@@ -21,6 +21,8 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
+ * 角色继承类
+ *
  * The simple interface of a role hierarchy.
  *
  * @author Michael Mayr

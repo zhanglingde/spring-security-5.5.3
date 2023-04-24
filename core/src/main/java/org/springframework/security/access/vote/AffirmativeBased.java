@@ -69,10 +69,9 @@ public class AffirmativeBased extends AbstractAccessDecisionManager {
 			}
 		}
 		if (deny > 0) {
-			throw new AccessDeniedException(
-					this.messages.getMessage("AbstractAccessDecisionManager.accessDenied", "Access is denied"));
+			throw new AccessDeniedException(this.messages.getMessage("AbstractAccessDecisionManager.accessDenied", "Access is denied"));
 		}
-		// To get this far, every AccessDecisionVoter abstained
+		// To get this far, every AccessDecisionVoter abstained 所有投票器投了拒绝
 		checkAllowIfAllAbstainDecisions();
 	}
 

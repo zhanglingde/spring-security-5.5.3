@@ -30,8 +30,7 @@ public final class ExpressionUtils {
 			return expr.getValue(ctx, Boolean.class);
 		}
 		catch (EvaluationException ex) {
-			throw new IllegalArgumentException("Failed to evaluate expression '" + expr.getExpressionString() + "'",
-					ex);
+			throw new IllegalArgumentException("Failed to evaluate expression '" + expr.getExpressionString() + "'", ex);
 		}
 	}
 

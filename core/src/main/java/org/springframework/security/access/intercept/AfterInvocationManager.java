@@ -40,11 +40,15 @@ import org.springframework.security.core.Authentication;
  * transaction.
  * </p>
  *
+ * 后置处理器,一般只在基于方法的权限控制中会用到,当目标方法执行完毕后,通过后置处理器对目标方法的返回值进行权限校验或者过滤
+ *
  * @author Ben Alex
  */
 public interface AfterInvocationManager {
 
 	/**
+	 * 对目标方法执行的结果进行处理
+	 *
 	 * Given the details of a secure object invocation including its returned
 	 * <code>Object</code>, make an access control decision or optionally modify the
 	 * returned <code>Object</code>.
