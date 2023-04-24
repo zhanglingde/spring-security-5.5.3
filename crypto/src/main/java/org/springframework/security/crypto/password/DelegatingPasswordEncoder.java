@@ -192,6 +192,9 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 
 	@Override
 	public String encode(CharSequence rawPassword) {
+        // {bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG
+        // {noop}123
+        // {pbkdf2}23b44a6d129f3ddf3e3c8d29412723dcbde72445e8ef6bf3b508fbf17fa4ed4
 		return PREFIX + this.idForEncode + SUFFIX + this.passwordEncoderForEncode.encode(rawPassword);
 	}
 
@@ -200,11 +203,14 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 		if (rawPassword == null && prefixEncodedPassword == null) {
 			return true;
 		}
+        // 1. 根据 id 获取加密方案
 		String id = extractId(prefixEncodedPassword);
 		PasswordEncoder delegate = this.idToPasswordEncoder.get(id);
+        // 2. 不存在加密方案使用默认的密码匹配器
 		if (delegate == null) {
 			return this.defaultPasswordEncoderForMatches.matches(rawPassword, prefixEncodedPassword);
 		}
+        // 3. 截取出密码，然后匹配
 		String encodedPassword = extractEncodedPassword(prefixEncodedPassword);
 		return delegate.matches(rawPassword, encodedPassword);
 	}
@@ -224,13 +230,20 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 		return prefixEncodedPassword.substring(start + 1, end);
 	}
 
+    /**
+     * 密码升级方法
+     * @param prefixEncodedPassword the encoded password to check
+     * @return
+     */
 	@Override
 	public boolean upgradeEncoding(String prefixEncodedPassword) {
 		String id = extractId(prefixEncodedPassword);
 		if (!this.idForEncode.equalsIgnoreCase(id)) {
+            // 加密方案不是默认的加密方案（BcryptPasswordEncoder）,就会自动进行密码升级，
 			return true;
 		}
 		else {
+            // 否则调用 upgradeEncoding 判断密码是否需要升级
 			String encodedPassword = extractEncodedPassword(prefixEncodedPassword);
 			return this.idToPasswordEncoder.get(id).upgradeEncoding(encodedPassword);
 		}
