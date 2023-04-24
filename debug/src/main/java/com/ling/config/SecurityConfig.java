@@ -1,7 +1,11 @@
 package com.ling.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -10,11 +14,44 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    /**
+     * 配置用户权限关联关系
+     * @param auth the {@link AuthenticationManagerBuilder} to use
+     * @throws Exception
+     */
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //
+        auth.inMemoryAuthentication()
+                .withUser("ling").password("{noop}123").roles("admin")
+                .and()
+                .withUser("zhang").password("{noop}123").roles("user")
+                .and()
+                .withUser("bai").password("{noop}123").authorities("READ_INFO");
+
+    }
+
+    // 角色继承
+    @Bean
+    RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        // admin 继承 user(admin 可以访问 /permission/user/hello)
+        roleHierarchy.setHierarchy("ROLE_admin > ROLE_user");
+        return roleHierarchy;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()    // 开启权限配置
+                .antMatchers("/permission/admin/**").hasRole("admin")
+                // 权限表达试
+                .antMatchers("/permission/user/**").access("hasAnyRole('user')")
+                // 用户必须具备 READ_INFO 权限才可以访问 /getinfo
+                .antMatchers("/permission/getinfo").hasAuthority("READ_INFO")
+                // 剩余请求只要认证后的用户就可以访问,可以通过 access 方法设置权限表达式
+                .anyRequest().access("isAuthenticated()")
                 // 所有请求都需要认证后才可访问
-                .anyRequest().authenticated()
+                // .anyRequest().authenticated()
                 .and()
                 // 表单登录配置
                 .formLogin()

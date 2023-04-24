@@ -22,6 +22,9 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 
 /**
+ * 决策管理器器
+ * 决策器同时管理多个投票器,同时调用投票器进行投票,根据投票结果作出相应的决策.
+ *
  * Makes a final access control (authorization) decision.
  *
  * @author Ben Alex
@@ -29,6 +32,8 @@ import org.springframework.security.core.Authentication;
 public interface AccessDecisionManager {
 
 	/**
+	 * 核心决策方法,在这个方法中判断是否允许当前 URL 或者方法的调用,如果不允许,则会抛出 AccessDeniedException 异常
+	 *
 	 * Resolves an access control decision for the passed parameters.
 	 * @param authentication the caller invoking the method (not null)
 	 * @param object the secured object being called
@@ -43,6 +48,8 @@ public interface AccessDecisionManager {
 			throws AccessDeniedException, InsufficientAuthenticationException;
 
 	/**
+	 * 判断是否支持处理 ConfigAttribute 对象
+	 *
 	 * Indicates whether this <code>AccessDecisionManager</code> is able to process
 	 * authorization requests presented with the passed <code>ConfigAttribute</code>.
 	 * <p>
@@ -59,6 +66,8 @@ public interface AccessDecisionManager {
 	boolean supports(ConfigAttribute attribute);
 
 	/**
+	 * 判断是否支持当前安全对象
+	 *
 	 * Indicates whether the <code>AccessDecisionManager</code> implementation is able to
 	 * provide access control decisions for the indicated secured object type.
 	 * @param clazz the class that is being queried

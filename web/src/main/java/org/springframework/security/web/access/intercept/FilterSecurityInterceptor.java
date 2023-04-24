@@ -39,6 +39,12 @@ import org.springframework.security.web.FilterInvocation;
  * Refer to {@link AbstractSecurityInterceptor} for details on the workflow.
  * </p>
  *
+ * 基于 URL 地址的权限管理(该类是一个过滤器)
+ *
+ * 在 configure(HttpSecurity) 方法中调用 http.authorizeRequests() 开启 URL 路径拦截规则配置时，
+ * 就会通过 AbstractInterceptUrlConfigurer.configure 方法将 FilterSecurityInterceptor 添加到 Spring Security 过滤器链中
+ *
+ *
  * @author Ben Alex
  * @author Rob Winch
  */
@@ -78,6 +84,7 @@ public class FilterSecurityInterceptor extends AbstractSecurityInterceptor imple
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		// 构建受保护对象 FilterInvocation 传入 invoke 方法中
 		invoke(new FilterInvocation(request, response, chain));
 	}
 
@@ -103,6 +110,7 @@ public class FilterSecurityInterceptor extends AbstractSecurityInterceptor imple
 		if (isApplied(filterInvocation) && this.observeOncePerRequest) {
 			// filter already applied to this request and user wants us to observe
 			// once-per-request handling, so don't re-do security checking
+			// 1. 如果当前过滤器已经执行过了，则继续执行剩下的过滤器
 			filterInvocation.getChain().doFilter(filterInvocation.getRequest(), filterInvocation.getResponse());
 			return;
 		}
@@ -110,6 +118,7 @@ public class FilterSecurityInterceptor extends AbstractSecurityInterceptor imple
 		if (filterInvocation.getRequest() != null && this.observeOncePerRequest) {
 			filterInvocation.getRequest().setAttribute(FILTER_APPLIED, Boolean.TRUE);
 		}
+		//2. 调用父类的 beforeInvocation 方法进行权限校验，校验通过后继续执行剩余的过滤器
 		InterceptorStatusToken token = super.beforeInvocation(filterInvocation);
 		try {
 			filterInvocation.getChain().doFilter(filterInvocation.getRequest(), filterInvocation.getResponse());

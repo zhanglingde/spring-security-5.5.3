@@ -21,6 +21,8 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 /**
+ * 可以使用该类表示一种权限（查看，删除，编辑等）；一个角色中一在多个权限，角色类中聚合一个该类的 List 列表即可
+ *
  * Basic concrete implementation of a {@link GrantedAuthority}.
  *
  * <p>

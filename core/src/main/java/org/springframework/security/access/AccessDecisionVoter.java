@@ -21,6 +21,10 @@ import java.util.Collection;
 import org.springframework.security.core.Authentication;
 
 /**
+ * 投票器接口
+ * 针对某一个操作进行投票,决定是否允许当前操作
+ *
+ *
  * Indicates a class is responsible for voting on authorization decisions.
  * <p>
  * The coordination of voting (ie polling {@code AccessDecisionVoter}s, tallying their
@@ -31,13 +35,18 @@ import org.springframework.security.core.Authentication;
  */
 public interface AccessDecisionVoter<S> {
 
+	// 投票通过
 	int ACCESS_GRANTED = 1;
 
+	// 弃权
 	int ACCESS_ABSTAIN = 0;
 
+	// 拒绝
 	int ACCESS_DENIED = -1;
 
 	/**
+	 * 判断是否支持处理 ConfigAttribute 对象
+	 *
 	 * Indicates whether this {@code AccessDecisionVoter} is able to vote on the passed
 	 * {@code ConfigAttribute}.
 	 * <p>
@@ -52,6 +61,8 @@ public interface AccessDecisionVoter<S> {
 	boolean supports(ConfigAttribute attribute);
 
 	/**
+	 * 判断是否支持处理受保护的安全对象
+	 *
 	 * Indicates whether the {@code AccessDecisionVoter} implementation is able to provide
 	 * access control votes for the indicated secured object type.
 	 * @param clazz the class that is being queried
@@ -80,10 +91,15 @@ public interface AccessDecisionVoter<S> {
 	 * parameter to maximise flexibility in making access control decisions, implementing
 	 * classes should not modify it or cause the represented invocation to take place (for
 	 * example, by calling {@code MethodInvocation.proceed()}).
-	 * @param authentication the caller making the invocation
-	 * @param object the secured object being invoked
-	 * @param attributes the configuration attributes associated with the secured object
+	 *
+	 * @param authentication 可以提取出当前用户所具备的权限
+	 * @param object 受保护的安全对象；如果是 URL 地址,Object 就是一个 FilterInvocation；如果是一个方法,object 就是一个 MethodInvocation 对象
+	 * @param attributes 表示访问受保护对象所需要的权限
 	 * @return either {@link #ACCESS_GRANTED}, {@link #ACCESS_ABSTAIN} or
+	 *
+	 * 具体的投票方法,根据用户所具有的权限以及当前请求需要的权限进行投票
+	 *
+	 *
 	 * {@link #ACCESS_DENIED}
 	 */
 	int vote(Authentication authentication, S object, Collection<ConfigAttribute> attributes);

@@ -101,11 +101,12 @@ import org.springframework.util.CollectionUtils;
  * exception to the original caller.</li>
  * </ol>
  *
+ * 权限处理拦截器,该类统筹着关于权限处理的一切
+ *
  * @author Ben Alex
  * @author Rob Winch
  */
-public abstract class AbstractSecurityInterceptor
-		implements InitializingBean, ApplicationEventPublisherAware, MessageSourceAware {
+public abstract class AbstractSecurityInterceptor implements InitializingBean, ApplicationEventPublisherAware, MessageSourceAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -176,15 +177,21 @@ public abstract class AbstractSecurityInterceptor
 		}
 	}
 
+	/**
+	 * 该方法中会调用前置处理器完成权限校验(投票器,决策管理器)
+	 * @param object
+	 * @return
+	 */
 	protected InterceptorStatusToken beforeInvocation(Object object) {
 		Assert.notNull(object, "Object was null");
 		if (!getSecureObjectClass().isAssignableFrom(object.getClass())) {
 			throw new IllegalArgumentException("Security invocation attempted for object " + object.getClass().getName()
-					+ " but AbstractSecurityInterceptor only configured to support secure objects of type: "
-					+ getSecureObjectClass());
+					+ " but AbstractSecurityInterceptor only configured to support secure objects of type: " + getSecureObjectClass());
 		}
+		// 1. obtainSecurityMetadataSource() 方法获取 SecurityMetadataSource 对象，调用 getAttributes 方法获取受保护对象所需要的权限
 		Collection<ConfigAttribute> attributes = this.obtainSecurityMetadataSource().getAttributes(object);
 		if (CollectionUtils.isEmpty(attributes)) {
+			// 获取到的值为空，如果 rejectPublicInvocations 为 true，表示受保护的对象拒绝公开调用，则抛出异常
 			Assert.isTrue(!this.rejectPublicInvocations,
 					() -> "Secure object invocation " + object
 							+ " was denied as public invocations are not allowed via this interceptor. "
@@ -193,18 +200,22 @@ public abstract class AbstractSecurityInterceptor
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug(LogMessage.format("Authorized public object %s", object));
 			}
+			// 如果 rejectPublicInvocations 为 false，表示受保护对象允许公开访问，此时直接返回 null即可
 			publishEvent(new PublicInvocationEvent(object));
 			return null; // no further work post-invocation
 		}
+		// 2. 到 SecurityContextHolder 中查看当前用户的认证信息是否存在
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			credentialsNotFound(this.messages.getMessage("AbstractSecurityInterceptor.authenticationNotFound",
 					"An Authentication object was not found in the SecurityContext"), object, attributes);
 		}
+		// 3. 检查当前用户是否已经登录
 		Authentication authenticated = authenticateIfRequired();
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(LogMessage.format("Authorizing %s with attributes %s", object, attributes));
 		}
 		// Attempt authorization
+		// 4. (核心) 调用 accessDecisionManager.decide 方法进行决策，该方法中会调用投票器进行投票，如果该方法执行抛出异常，说明权限不足
 		attemptAuthorization(object, attributes, authenticated);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(LogMessage.format("Authorized %s with attributes %s", object, attributes));
@@ -214,8 +225,12 @@ public abstract class AbstractSecurityInterceptor
 		}
 
 		// Attempt to run as a different user
+		// 5. 调用 buildRunAs 方法去临时替换用户身份，默认情况下，runAsManager 的实例是 NullRunAsManager ，不做任何替换，返回的 runAs 对象为 null
 		Authentication runAs = this.runAsManager.buildRunAs(authenticated, object, attributes);
 		if (runAs != null) {
+			// runAs 不为空，将 SecurityContextHolder 中保存的用户信息修改为替换的用户对象，然后返回一个InterceptorStatusToken 对象
+			// InterceptorStatusToken 对象中保存了当前用户的 SecurityContext 对象，加入进行了临时替换，替换完成后，最终还是要恢复成当前
+			// 用户身份的，恢复的依据就是 InterceptorStatusToken 中保存的原始 SecurityContext 对象
 			SecurityContext origCtx = SecurityContextHolder.getContext();
 			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 			SecurityContextHolder.getContext().setAuthentication(runAs);
@@ -228,19 +243,25 @@ public abstract class AbstractSecurityInterceptor
 		}
 		this.logger.trace("Did not switch RunAs authentication since RunAsManager returned null");
 		// no further work post-invocation
+		// runAs 为空，直接创建一个 InterceptorStatusToken 对象返回
 		return new InterceptorStatusToken(SecurityContextHolder.getContext(), false, attributes, object);
 
 	}
 
-	private void attemptAuthorization(Object object, Collection<ConfigAttribute> attributes,
-			Authentication authenticated) {
+	/**
+	 *
+	 * @param object 请求对象
+	 * @param attributes 访问受保护对象需要的权限
+	 * @param authenticated 登录用户信息,包含用户拥有的角色权限
+	 */
+	private void attemptAuthorization(Object object, Collection<ConfigAttribute> attributes, Authentication authenticated) {
 		try {
+			// 决策
 			this.accessDecisionManager.decide(authenticated, object, attributes);
 		}
 		catch (AccessDeniedException ex) {
 			if (this.logger.isTraceEnabled()) {
-				this.logger.trace(LogMessage.format("Failed to authorize %s with attributes %s using %s", object,
-						attributes, this.accessDecisionManager));
+				this.logger.trace(LogMessage.format("Failed to authorize %s with attributes %s using %s", object, attributes, this.accessDecisionManager));
 			}
 			else if (this.logger.isDebugEnabled()) {
 				this.logger.debug(LogMessage.format("Failed to authorize %s with attributes %s", object, attributes));
@@ -251,6 +272,10 @@ public abstract class AbstractSecurityInterceptor
 	}
 
 	/**
+	 * 主要做一些校验后的清理工作
+	 *
+	 * 如果临时替换了用户身份,在该方法中恢复用户身份
+	 *
 	 * Cleans up the work of the <tt>AbstractSecurityInterceptor</tt> after the secure
 	 * object invocation has been completed. This method should be invoked after the
 	 * secure object invocation and before afterInvocation regardless of the secure object
@@ -258,6 +283,7 @@ public abstract class AbstractSecurityInterceptor
 	 * @param token as returned by the {@link #beforeInvocation(Object)} method
 	 */
 	protected void finallyInvocation(InterceptorStatusToken token) {
+		// token 中保存了用户的原始身份信息
 		if (token != null && token.isContextHolderRefreshRequired()) {
 			SecurityContextHolder.setContext(token.getSecurityContext());
 			if (this.logger.isDebugEnabled()) {
@@ -268,11 +294,12 @@ public abstract class AbstractSecurityInterceptor
 	}
 
 	/**
+	 * 该方法中调用后置处理器完成权限校验
+	 *
 	 * Completes the work of the <tt>AbstractSecurityInterceptor</tt> after the secure
 	 * object invocation has been completed.
-	 * @param token as returned by the {@link #beforeInvocation(Object)} method
-	 * @param returnedObject any object returned from the secure object invocation (may be
-	 * <tt>null</tt>)
+	 * @param token as returned by the {@link #beforeInvocation(Object)} method, 包含用户身份原始信息
+	 * @param returnedObject 受保护对象的返回值 (may be null)
 	 * @return the object the secure object invocation should ultimately return to its
 	 * caller (may be <tt>null</tt>)
 	 */
@@ -285,12 +312,11 @@ public abstract class AbstractSecurityInterceptor
 		if (this.afterInvocationManager != null) {
 			// Attempt after invocation handling
 			try {
-				returnedObject = this.afterInvocationManager.decide(token.getSecurityContext().getAuthentication(),
-						token.getSecureObject(), token.getAttributes(), returnedObject);
+				// (核心) 对 returnedObject 进行过滤,然后将过滤的结果返回
+				returnedObject = this.afterInvocationManager.decide(token.getSecurityContext().getAuthentication(), token.getSecureObject(), token.getAttributes(), returnedObject);
 			}
 			catch (AccessDeniedException ex) {
-				publishEvent(new AuthorizationFailureEvent(token.getSecureObject(), token.getAttributes(),
-						token.getSecurityContext().getAuthentication(), ex));
+				publishEvent(new AuthorizationFailureEvent(token.getSecureObject(), token.getAttributes(), token.getSecurityContext().getAuthentication(), ex));
 				throw ex;
 			}
 		}

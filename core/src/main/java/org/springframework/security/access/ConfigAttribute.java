@@ -23,6 +23,8 @@ import org.springframework.security.access.intercept.RunAsManager;
 /**
  * Stores a security system related configuration attribute.
  *
+ * 权限元数据
+ *
  * <p>
  * When an
  * {@link org.springframework.security.access.intercept.AbstractSecurityInterceptor} is
@@ -53,6 +55,9 @@ public interface ConfigAttribute extends Serializable {
 	 * @return a representation of the configuration attribute (or <code>null</code> if
 	 * the configuration attribute cannot be expressed as a <code>String</code> with
 	 * sufficient precision).
+	 *
+	 * 返回具体的权限字符串
+	 *
 	 */
 	String getAttribute();
 
